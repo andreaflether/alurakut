@@ -1,10 +1,21 @@
-import styled from 'styled-components'
-
-const Title = styled.h1`
-  font-size: 50px;
-  color: ${({ theme }) => theme.colors.primary};
-`
+import Box from '../src/components/Box'
+import MainGrid from '../src/components/MainGrid'
 
 export default function Home() {
-  return <Title>My page</Title>
+  return(
+    <MainGrid>
+      <div className="profileArea" style={{gridArea: 'profile'}}>
+        <Box>
+          <img src="https://github.com/andreaflether.png" />
+        </Box>
+      </div>
+      <div className="welcomeArea" style={{gridArea: 'welcome'}}>
+        <Box>Welcome</Box>
+      </div>
+      <div className="relationshipsArea" style={{gridArea: 'relationships'}}>
+        <Box>People</Box>
+        <Box>Communities</Box>
+      </div>
+    </MainGrid>
+  )
 }
