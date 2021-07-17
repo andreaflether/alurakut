@@ -1,4 +1,5 @@
 import { createGlobalStyle, ThemeProvider } from 'styled-components'
+import { AlurakutStyles } from '../src/lib/AlurakutCommons'
 
 const theme = {
   colors: {
@@ -29,6 +30,8 @@ const GlobalStyle = createGlobalStyle`
     height: auto;
     display: block;
   }
+
+  ${AlurakutStyles}
 `
 
 export default function App({ Component, pageProps }) {
