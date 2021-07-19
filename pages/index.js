@@ -2,7 +2,7 @@ import Box from '../src/components/Box'
 import MainGrid from '../src/components/MainGrid'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons'
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function ProfileSidebar({githubUser}) {
   return(
@@ -18,10 +18,45 @@ function ProfileSidebar({githubUser}) {
   )
 }
 
+function ProfileRelationsBox({items, title}) {
+  return(
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">{title} ({items.length})</h2>
+      <ul>
+        {items.map((item) => {
+          return(
+            <li key={item.id}>
+              <a href={`/users/${item.login}`}>
+                <img src={`https://github.com/${item.login}.png`} alt="Imagem do usuário no Github"/>
+                <span>{item.login}</span>
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  )
+}
+
 export default function Home() {
   const githubUser = 'andreaflether'
   const [communities, setCommunities] = useState([])
   const favPeople = ['twice', 'blackpink', 'dreamcatcher', 'itzy', 'redvelvet', 'gidle']
+  const [followers, setFollowers] = useState([])
+
+  useEffect(() => {
+    fetch('https://api.github.com/users/andreaflether/followers')
+    .then((response) => {
+      return response.json()
+    })
+    .then((fullResponse) => {
+      setFollowers(fullResponse)
+    })
+
+    // API GraphQL
+    fetch('')
+  }, [])
+
 
   function handleCommunityCreate(e) {
     e.preventDefault()
@@ -99,6 +134,8 @@ export default function Home() {
               })}
             </ul>
           </ProfileRelationsBoxWrapper>
+
+          <ProfileRelationsBox items={followers} title="Seguidores" />
         </div>
       </MainGrid>
     </>
