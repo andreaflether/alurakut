@@ -54,7 +54,29 @@ export default function Home() {
     })
 
     // API GraphQL
-    fetch('')
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '5362f9ddce55128b86b3b7cc6eecb2',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ "query": `query {
+        allCommunities {
+          id
+          title
+          creatorslug
+          imageurl
+          _status
+          _firstPublishedAt
+        }
+      }` })
+    })
+    .then((response) => response.json())
+    .then((fullResponse) => {
+      const datoCommunities = fullResponse.data.allCommunities
+      setCommunities(datoCommunities)
+    })
   }, [])
 
 
@@ -64,10 +86,22 @@ export default function Home() {
     
     const community = {
       title: formData.get('title'),
-      image: formData.get('image'),
-      created_at: new Date().toISOString()
+      imageurl: formData.get('image'),
+      creatorslug: 'andreaflether'
+      // created_at: new Date().toISOString()
     }
-    setCommunities([...communities, community])
+
+    fetch('/api/communities', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(community)
+    }).then(async(response) => {
+      const data = await response.json()
+      const community = data.record
+      setCommunities([...communities, community])
+    })
   }
   
   return(
@@ -125,8 +159,8 @@ export default function Home() {
               {communities.map((community) => {
                 return(
                   <li key={community.created_at}>
-                    <a href="">
-                      <img src={community.image} alt="Imagem da comunidade" />
+                    <a href={`/communities/${community.id}`}>
+                      <img src={community.imageurl} alt="Imagem da comunidade" />
                       <span>{community.title}</span>
                     </a>
                   </li>
