@@ -3,8 +3,10 @@ import MainGrid from '../src/components/MainGrid'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons'
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations'
 import { useState, useEffect } from 'react'
+import nookies from 'nookies'
+import jwt from 'jsonwebtoken'
 
-function ProfileSidebar({githubUser}) {
+function ProfileSidebar({ githubUser }) {
   return(
     <Box as="aside">
       <img src={`https://github.com/${githubUser}.png`} style={{ borderRadius: '8px' }} />
@@ -38,14 +40,14 @@ function ProfileRelationsBox({items, title}) {
   )
 }
 
-export default function Home() {
-  const githubUser = 'andreaflether'
+export default function Home({githubUser}) {
+  // const githubUser = 'andreaflether'
   const [communities, setCommunities] = useState([])
   const favPeople = ['twice', 'blackpink', 'dreamcatcher', 'itzy', 'redvelvet', 'gidle']
   const [followers, setFollowers] = useState([])
 
   useEffect(() => {
-    fetch('https://api.github.com/users/andreaflether/followers')
+    fetch(`https://api.github.com/users/${githubUser}/followers`)
     .then((response) => {
       return response.json()
     })
@@ -138,27 +140,11 @@ export default function Home() {
         </div>
         <div className="relationshipsArea" style={{gridArea: 'relationships'}}>
           <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">Pessoas da Comunidade ({favPeople.length})</h2>
-            <ul>
-              {favPeople.map((item) => {
-                return(
-                  <li key={item}>
-                    <a href={`/users/${item}`}>
-                      <img src={`https://github.com/${item}.png`} alt="Imagem do usuário no Github"/>
-                      <span>{item}</span>
-                    </a>
-                  </li>
-                )
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>
-
-          <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">Comunidades ({communities.length})</h2>
             <ul>
               {communities.map((community) => {
                 return(
-                  <li key={community.created_at}>
+                  <li key={community.id}>
                     <a href={`/communities/${community.id}`}>
                       <img src={community.imageurl} alt="Imagem da comunidade" />
                       <span>{community.title}</span>
@@ -174,4 +160,33 @@ export default function Home() {
       </MainGrid>
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const cookies = nookies.get(context)
+  const token = cookies.USER_TOKEN
+  
+  const { isAuthenticated } = await fetch('https://alurakut.vercel.app/api/auth', {
+    headers: { 
+      Authorization: token
+    }
+  })
+  .then((response) => response.json())
+  
+  if(!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    }
+  }
+  
+  const { githubUser } = jwt.decode(token)
+
+  return {
+    props: {
+      githubUser: githubUser
+    }
+  }
 }
